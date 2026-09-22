@@ -70,23 +70,23 @@ extern void *kmalloc(uint64_t size);
 
 
 
+/*
+ * NicOS kernel
+ *
+ * Après ExitBootServices(), aucune fonction UEFI n'est utilisée.
+ * Le clavier est lu directement via le contrôleur PS/2.
+ */
 
 
 
+/* ============================================================
+ * I/O x86
+ * ============================================================ */
 
 
- 
-
-
-
-
-
- 
-
-
-
-
- 
+/* ============================================================
+ * Physical Memory Manager
+ * ============================================================ */
 
 #define PAGE_SIZE 4096ULL
 #define PMM_MAX_MEMORY (4ULL * 1024ULL * 1024ULL * 1024ULL)
@@ -142,9 +142,9 @@ static int pmm_is_free(uint64_t page)
 
 static void pmm_init(BootInfo *boot)
 {
-    
-
- 
+    /*
+     * Tout est réservé par défaut.
+     */
     for (uint64_t i = 0; i < PMM_BITMAP_SIZE; i++)
         pmm_bitmap[i] = 0xFF;
 
@@ -165,10 +165,10 @@ static void pmm_init(BootInfo *boot)
             (EFI_MEMORY_DESCRIPTOR *)
             ((uint8_t *)boot->memory_map + offset);
 
-        
-
-
- 
+        /*
+         * On ne considère comme mémoire utilisable
+         * que EfiConventionalMemory.
+         */
         if (desc->type == EFI_CONVENTIONAL_MEMORY) {
 
             uint64_t start_address =
@@ -177,9 +177,9 @@ static void pmm_init(BootInfo *boot)
             uint64_t pages =
                 desc->number_of_pages;
 
-            
-
- 
+            /*
+             * Ne pas utiliser la mémoire sous 1 MiB.
+             */
             if (start_address < 0x100000) {
 
                 uint64_t skip =
@@ -216,11 +216,11 @@ static void pmm_init(BootInfo *boot)
         offset += boot->memory_descriptor_size;
     }
 
-    
-
-
-
- 
+    /*
+     * La quantité affichée comme "Total memory"
+     * correspond maintenant à la mémoire physique
+     * utilisable par le PMM.
+     */
     pmm_total_memory =
         pmm_free_pages * PAGE_SIZE;
 }
@@ -257,11 +257,11 @@ uint64_t pmm_alloc_page(void)
 
 
 
-
-
-
-
- 
+/*
+ * Alloue un bloc de pages physiques contiguës.
+ *
+ * Retourne l'adresse physique de la première page.
+ */
 uint64_t pmm_alloc_contiguous(uint64_t page_count)
 {
     if (page_count == 0)
@@ -385,9 +385,9 @@ static uint64_t pmm_get_free_memory(void)
 }
 
 
-
-
- 
+/* ============================================================
+ * Framebuffer
+ * ============================================================ */
 
 static void put_pixel(
     BootInfo *boot,
@@ -482,207 +482,207 @@ static void clear_screen(
 }
 
 
-
-
-
-
-
-
- 
+/* ============================================================
+ * Police 5x7
+ *
+ * Index :
+ *   0-25  = A-Z
+ *   26-35 = 0-9
+ * ============================================================ */
 
 static const uint8_t letters[62][7] = {
 
-     
+    /* A */
     {0b01110,0b10001,0b10001,0b11111,0b10001,0b10001,0b10001},
 
-     
+    /* B */
     {0b11110,0b10001,0b10001,0b11110,0b10001,0b10001,0b11110},
 
-     
+    /* C */
     {0b01110,0b10001,0b10000,0b10000,0b10000,0b10001,0b01110},
 
-     
+    /* D */
     {0b11110,0b10001,0b10001,0b10001,0b10001,0b10001,0b11110},
 
-     
+    /* E */
     {0b11111,0b10000,0b10000,0b11110,0b10000,0b10000,0b11111},
 
-     
+    /* F */
     {0b11111,0b10000,0b10000,0b11110,0b10000,0b10000,0b10000},
 
-     
+    /* G */
     {0b01110,0b10001,0b10000,0b10111,0b10001,0b10001,0b01110},
 
-     
+    /* H */
     {0b10001,0b10001,0b10001,0b11111,0b10001,0b10001,0b10001},
 
-     
+    /* I */
     {0b11111,0b00100,0b00100,0b00100,0b00100,0b00100,0b11111},
 
-     
+    /* J */
     {0b00111,0b00010,0b00010,0b00010,0b00010,0b10010,0b01100},
 
-     
+    /* K */
     {0b10001,0b10010,0b10100,0b11000,0b10100,0b10010,0b10001},
 
-     
+    /* L */
     {0b10000,0b10000,0b10000,0b10000,0b10000,0b10000,0b11111},
 
-     
+    /* M */
     {0b10001,0b11011,0b10101,0b10101,0b10001,0b10001,0b10001},
 
-     
+    /* N */
     {0b10001,0b11001,0b10101,0b10011,0b10001,0b10001,0b10001},
 
-     
+    /* O */
     {0b01110,0b10001,0b10001,0b10001,0b10001,0b10001,0b01110},
 
-     
+    /* P */
     {0b11110,0b10001,0b10001,0b11110,0b10000,0b10000,0b10000},
 
-     
+    /* Q */
     {0b01110,0b10001,0b10001,0b10001,0b10101,0b10010,0b01101},
 
-     
+    /* R */
     {0b11110,0b10001,0b10001,0b11110,0b10100,0b10010,0b10001},
 
-     
+    /* S */
     {0b01111,0b10000,0b10000,0b01110,0b00001,0b00001,0b11110},
 
-     
+    /* T */
     {0b11111,0b00100,0b00100,0b00100,0b00100,0b00100,0b00100},
 
-     
+    /* U */
     {0b10001,0b10001,0b10001,0b10001,0b10001,0b10001,0b01110},
 
-     
+    /* V */
     {0b10001,0b10001,0b10001,0b10001,0b10001,0b01010,0b00100},
 
-     
+    /* W */
     {0b10001,0b10001,0b10001,0b10101,0b10101,0b11011,0b10001},
 
-     
+    /* X */
     {0b10001,0b10001,0b01010,0b00100,0b01010,0b10001,0b10001},
 
-     
+    /* Y */
     {0b10001,0b10001,0b01010,0b00100,0b00100,0b00100,0b00100},
 
-     
+    /* Z */
     {0b11111,0b00001,0b00010,0b00100,0b01000,0b10000,0b11111},
 
-     
+    /* a */
     {0b00000,0b00000,0b01110,0b00001,0b01111,0b10001,0b01111},
 
-     
+    /* b */
     {0b10000,0b10000,0b10110,0b11001,0b10001,0b10001,0b11110},
 
-     
+    /* c */
     {0b00000,0b00000,0b01110,0b10001,0b10000,0b10001,0b01110},
 
-     
+    /* d */
     {0b00001,0b00001,0b01101,0b10011,0b10001,0b10001,0b01111},
 
-     
+    /* e */
     {0b00000,0b00000,0b01110,0b10001,0b11111,0b10000,0b01110},
 
-     
+    /* f */
     {0b00110,0b01001,0b01000,0b11100,0b01000,0b01000,0b01000},
 
-     
+    /* g */
     {0b00000,0b00000,0b01111,0b10001,0b01111,0b00001,0b01110},
 
-     
+    /* h */
     {0b10000,0b10000,0b10110,0b11001,0b10001,0b10001,0b10001},
 
-     
+    /* i */
     {0b00100,0b00000,0b01100,0b00100,0b00100,0b00100,0b01110},
 
-     
+    /* j */
     {0b00010,0b00000,0b00110,0b00010,0b00010,0b10010,0b01100},
 
-     
+    /* k */
     {0b10000,0b10000,0b10010,0b10100,0b11000,0b10100,0b10010},
 
-     
+    /* l */
     {0b01100,0b00100,0b00100,0b00100,0b00100,0b00100,0b01110},
 
-     
+    /* m */
     {0b00000,0b00000,0b11010,0b10101,0b10101,0b10101,0b10101},
 
-     
+    /* n */
     {0b00000,0b00000,0b10110,0b11001,0b10001,0b10001,0b10001},
 
-     
+    /* o */
     {0b00000,0b00000,0b01110,0b10001,0b10001,0b10001,0b01110},
 
-     
+    /* p */
     {0b00000,0b00000,0b11110,0b10001,0b11110,0b10000,0b10000},
 
-     
+    /* q */
     {0b00000,0b00000,0b01111,0b10001,0b01111,0b00001,0b00001},
 
-     
+    /* r */
     {0b00000,0b00000,0b10110,0b11001,0b10000,0b10000,0b10000},
 
-     
+    /* s */
     {0b00000,0b00000,0b01111,0b10000,0b01110,0b00001,0b11110},
 
-     
+    /* t */
     {0b01000,0b01000,0b11110,0b01000,0b01000,0b01001,0b00110},
 
-     
+    /* u */
     {0b00000,0b00000,0b10001,0b10001,0b10001,0b10011,0b01101},
 
-     
+    /* v */
     {0b00000,0b00000,0b10001,0b10001,0b10001,0b01010,0b00100},
 
-     
+    /* w */
     {0b00000,0b00000,0b10001,0b10101,0b10101,0b10101,0b01010},
 
-     
+    /* x */
     {0b00000,0b00000,0b10001,0b01010,0b00100,0b01010,0b10001},
 
-     
+    /* y */
     {0b00000,0b00000,0b10001,0b10001,0b01111,0b00001,0b01110},
 
-     
+    /* z */
     {0b00000,0b00000,0b11111,0b00010,0b00100,0b01000,0b11111},
 
-     
+    /* 0 */
     {0b01110,0b10001,0b10011,0b10101,0b11001,0b10001,0b01110},
 
-     
+    /* 1 */
     {0b00100,0b01100,0b00100,0b00100,0b00100,0b00100,0b01110},
 
-     
+    /* 2 */
     {0b01110,0b10001,0b00001,0b00010,0b00100,0b01000,0b11111},
 
-     
+    /* 3 */
     {0b11110,0b00001,0b00001,0b01110,0b00001,0b00001,0b11110},
 
-     
+    /* 4 */
     {0b00010,0b00110,0b01010,0b10010,0b11111,0b00010,0b00010},
 
-     
+    /* 5 */
     {0b11111,0b10000,0b10000,0b11110,0b00001,0b00001,0b11110},
 
-     
+    /* 6 */
     {0b01110,0b10000,0b10000,0b11110,0b10001,0b10001,0b01110},
 
-     
+    /* 7 */
     {0b11111,0b00001,0b00010,0b00100,0b01000,0b01000,0b01000},
 
-     
+    /* 8 */
     {0b01110,0b10001,0b10001,0b01110,0b10001,0b10001,0b01110},
 
-     
+    /* 9 */
     {0b01110,0b10001,0b10001,0b01111,0b00001,0b00001,0b01110}
 };
 
 
-
-
- 
+/* ============================================================
+ * Dessin texte
+ * ============================================================ */
 
 void draw_glyph(
     BootInfo *boot,
@@ -974,20 +974,20 @@ void draw_glyph(
     }
 }
 
+/* ============================================================
+ * Clavier PS/2
+ * ============================================================ */
 
 
- 
-
-
-
-
-
-
-
-
-
-
- 
+/*
+ * Scancodes Set 1.
+ *
+ * Retourne :
+ *   caractère ASCII
+ *   0 si la touche ne produit pas de caractère
+ *   '\n' pour Entrée
+ *   '\b' pour Backspace
+ */
 static char scancode_to_ascii(
     uint8_t scancode,
     uint8_t *shift
@@ -1149,9 +1149,9 @@ static char scancode_to_ascii(
     return normal[scancode];
 }
 
-
-
- 
+/* ============================================================
+ * Terminal
+ * ============================================================ */
 
 #define FONT_SCALE 3
 #define CHAR_WIDTH (6 * FONT_SCALE)
@@ -1216,10 +1216,10 @@ static void terminal_newline(BootInfo *boot)
         volatile uint32_t *fb =
             (volatile uint32_t *)boot->framebuffer;
 
-        
-
-
- 
+        /*
+         * Fait remonter tout le contenu du terminal
+         * d'une ligne.
+         */
         for (uint32_t y = TERMINAL_Y;
              y + CHAR_HEIGHT < bottom;
              y++) {
@@ -1237,9 +1237,9 @@ static void terminal_newline(BootInfo *boot)
             }
         }
 
-        
-
- 
+        /*
+         * Efface uniquement la nouvelle ligne du bas.
+         */
         uint32_t clear_y = bottom - CHAR_HEIGHT;
 
         for (uint32_t y = clear_y;
@@ -1342,6 +1342,32 @@ static int command_equals(
     }
 
     return *a == 0 && *b == 0;
+}
+
+
+/*
+ * Retourne un pointeur vers ce qui suit `prefix` dans `str` si
+ * `str` commence bien par `prefix`, sinon NULL.
+ *
+ * Remplace les anciennes comparaisons codées en dur du type
+ * command[0]=='t' && command[1]=='o' && ... && command[5]==' ',
+ * qui étaient fragiles (silencieusement fausses si `prefix`
+ * changeait) et peu lisibles.
+ */
+static const char *command_prefix(
+    const char *str,
+    const char *prefix
+)
+{
+    while (*prefix) {
+        if (*str != *prefix)
+            return 0;
+
+        str++;
+        prefix++;
+    }
+
+    return str;
 }
 
 
@@ -1718,6 +1744,20 @@ static void command_cat(
         return;
     }
 
+    /*
+     * fs_read_file() ne garantit pas que le contenu copié
+     * soit terminé par un octet nul, notamment si le fichier
+     * remplit exactement le buffer. Sans cette garde,
+     * terminal_string() peut lire au-delà de `buffer` (bug
+     * de dépassement de tampon en lecture).
+     */
+    uint32_t safe_len = (uint32_t)result;
+
+    if (safe_len >= sizeof(buffer))
+        safe_len = sizeof(buffer) - 1;
+
+    buffer[safe_len] = 0;
+
     terminal_string(
         boot,
         buffer
@@ -1732,6 +1772,17 @@ extern int fs_file_exists(
 );
 
 
+/*
+ * Métadonnées de chargement des applications userspace.
+ *
+ * Définies au niveau fichier plutôt qu'en macro locale à
+ * command_run(): une macro locale à une fonction est un anti-
+ * pattern (portée trompeuse, ré-évaluation à chaque appel de
+ * USER_STACK_TOP alors que USER_BASE/USER_SIZE sont constants).
+ */
+#define USER_PAGE_SIZE 0x1000ULL
+#define USER_STACK_TOP (USER_BASE + USER_SIZE - 16)
+
 static void command_run(BootInfo *boot, const char *name)
 {
     int runtime_mode = 0;
@@ -1745,10 +1796,7 @@ static void command_run(BootInfo *boot, const char *name)
         name += 3;
     }
 
-    #define USER_PAGE_SIZE 0x1000ULL
-    #define USER_STACK_TOP (USER_BASE + USER_SIZE - 16)
-
-    uint32_t inode_number;
+    uint32_t inode_number = 0;
 
     if (!name || !name[0]) {
         terminal_string(boot, "usage: r [-r ]<app>");
@@ -1763,10 +1811,10 @@ static void command_run(BootInfo *boot, const char *name)
         return;
     }
 
-    
-
-
- 
+    /*
+     * Alloue l'espace userspace.
+     * La dernière page est réservée à la pile.
+     */
     for (uint64_t address = USER_BASE;
          address < USER_BASE + USER_SIZE;
          address += USER_PAGE_SIZE) {
@@ -1778,14 +1826,17 @@ static void command_run(BootInfo *boot, const char *name)
         }
     }
 
-    
+    /*
+     * Charge le binaire brut à USER_BASE.
+     * Le binaire doit avoir été construit avec le runtime NicOS.
+     */
+    uint32_t max_app_size =
+        (uint32_t)(USER_SIZE - USER_PAGE_SIZE);
 
-
- 
     int size = fs_read_file(
         name,
         (char *)USER_BASE,
-        (uint32_t)(USER_SIZE - USER_PAGE_SIZE)
+        max_app_size
     );
 
     if (size < 0) {
@@ -1794,9 +1845,23 @@ static void command_run(BootInfo *boot, const char *name)
         return;
     }
 
+    /*
+     * Bug corrigé : un fichier vide (size == 0) était
+     * auparavant chargé en ring3 sans contrôle, ce qui
+     * exécutait de la mémoire userspace non initialisée
+     * comme du code.
+     */
+    if (size == 0) {
+        terminal_string(boot, "loader: app is empty");
+        terminal_newline(boot);
+        return;
+    }
+
     terminal_string(boot, "starting ");
     terminal_string(boot, name);
-    terminal_string(boot, " (");
+    terminal_string(boot, " (inode ");
+    terminal_number(boot, (uint64_t)inode_number);
+    terminal_string(boot, ", ");
     terminal_number(boot, (uint64_t)size);
     terminal_string(boot, " bytes");
 
@@ -1806,6 +1871,20 @@ static void command_run(BootInfo *boot, const char *name)
 
     terminal_string(boot, ")");
     terminal_newline(boot);
+
+    /*
+     * fs_read_file() clampe silencieusement sa lecture à
+     * max_app_size. Si la taille lue atteint exactement cette
+     * limite, le fichier a pu être tronqué : on prévient
+     * plutôt que de lancer silencieusement une app incomplète.
+     */
+    if ((uint32_t)size >= max_app_size) {
+        terminal_string(
+            boot,
+            "loader: warning, app may be truncated to fit user space"
+        );
+        terminal_newline(boot);
+    }
 
     kernel_debug("[RINGTRACE] R0: before_ring3\r\n");
 
@@ -1927,24 +2006,14 @@ static void execute_command(
         command_ls(boot);
     }
 
-    else if (command[0] == 't' &&
-             command[1] == 'o' &&
-             command[2] == 'u' &&
-             command[3] == 'c' &&
-             command[4] == 'h' &&
-             command[5] == ' ') {
+    else if (command_prefix(command, "touch ")) {
 
-        command_touch(boot, &command[6]);
+        command_touch(boot, command_prefix(command, "touch "));
     }
 
-    else if (command[0] == 'm' &&
-             command[1] == 'k' &&
-             command[2] == 'd' &&
-             command[3] == 'i' &&
-             command[4] == 'r' &&
-             command[5] == ' ') {
+    else if (command_prefix(command, "mkdir ")) {
 
-        command_mkdir(boot, &command[6]);
+        command_mkdir(boot, command_prefix(command, "mkdir "));
     }
 
     else if (command_equals(command, "touch")) {
@@ -1957,19 +2026,11 @@ static void execute_command(
         command_mkdir(boot, 0);
     }
 
-    else if (command[0] == 'w' &&
-             command[1] == 'r' &&
-             command[2] == 'i' &&
-             command[3] == 't' &&
-             command[4] == 'e' &&
-             command[5] == ' ') {
-        command_write(boot, &command[6]);
+    else if (command_prefix(command, "write ")) {
+        command_write(boot, command_prefix(command, "write "));
     }
-    else if (command[0] == 'c' &&
-             command[1] == 'a' &&
-             command[2] == 't' &&
-             command[3] == ' ') {
-        command_cat(boot, &command[4]);
+    else if (command_prefix(command, "cat ")) {
+        command_cat(boot, command_prefix(command, "cat "));
     }
     else if (command_equals(command, "heap")) {
 
@@ -2001,8 +2062,8 @@ static void execute_command(
         terminal_newline(boot);
     }
 
-    else if (command[0] == 'r' && command[1] == ' ') {
-        command_run(boot, &command[2]);
+    else if (command_prefix(command, "r ")) {
+        command_run(boot, command_prefix(command, "r "));
     }
 
     else if (command_length > 0) {
@@ -2018,9 +2079,9 @@ static void execute_command(
 }
 
 
-
-
- 
+/* ============================================================
+ * Terminal principal
+ * ============================================================ */
 
 static uint64_t read_tsc(void)
 {
@@ -2169,7 +2230,7 @@ void kmain(BootInfo *boot)
     gdt_init();
     idt_init();
     kernel_debug("[KERNEL] AFTER paging_init\r\n");
-    kernel_debug("[KERNEL] paging OK\\n");
+    kernel_debug("[KERNEL] paging OK\n");
 
     kernel_debug("[KERNEL] BEFORE pmm_init\r\n");
     pmm_init(boot);
@@ -2180,12 +2241,12 @@ void kmain(BootInfo *boot)
     } else {
         kernel_debug("[GFX] backbuffer OK\r\n");
     }
-    kernel_debug("[KERNEL] pmm OK\\n");
+    kernel_debug("[KERNEL] pmm OK\n");
 
     kernel_debug("[KERNEL] BEFORE heap_init\r\n");
     heap_init();
     kernel_debug("[KERNEL] AFTER heap_init\r\n");
-    kernel_debug("[KERNEL] heap OK\\n");
+    kernel_debug("[KERNEL] heap OK\n");
 
     kernel_debug("[KERNEL] BEFORE fs_init\r\n");
 
@@ -2215,9 +2276,9 @@ void kmain(BootInfo *boot)
                 "test",
                 (const char *)test_app,
                 sizeof(test_app))) {
-            kernel_debug("[FS] test application created\\r\\n");
+            kernel_debug("[FS] test application created\r\n");
         } else {
-            kernel_debug("[FS] test application creation FAILED\\r\\n");
+            kernel_debug("[FS] test application creation FAILED\r\n");
         }
     }
 
@@ -2278,22 +2339,22 @@ void kmain(BootInfo *boot)
     }
 
     kernel_debug("[KERNEL] AFTER fs_init\r\n");
-    kernel_debug("[KERNEL] fs OK\\n");
+    kernel_debug("[KERNEL] fs OK\n");
 
     kernel_debug("[KERNEL] AFTER clear_screen\r\n");
 
-    
-
- 
+    /*
+     * Bureau graphique NicOS.
+     */
 
     clear_screen(
         boot,
         0x00101820
     );
 
-    
-
- 
+    /*
+     * Barre supérieure.
+     */
     draw_rect(
         boot,
         0,
@@ -2303,9 +2364,9 @@ void kmain(BootInfo *boot)
         0x00202C3A
     );
 
-    
-
- 
+    /*
+     * Petit indicateur à gauche.
+     */
     draw_rect(
         boot,
         16,
@@ -2315,9 +2376,9 @@ void kmain(BootInfo *boot)
         0x004080A0
     );
 
-    
-
- 
+    /*
+     * Panneau latéral.
+     */
     draw_rect(
         boot,
         0,
@@ -2327,9 +2388,9 @@ void kmain(BootInfo *boot)
         0x00151D26
     );
 
-    
-
- 
+    /*
+     * Séparation du panneau.
+     */
     draw_hline(
         boot,
         220,
@@ -2338,9 +2399,9 @@ void kmain(BootInfo *boot)
         0x00406070
     );
 
-    
-
- 
+    /*
+     * Logo NicOS.
+     */
     uint32_t scale = 5;
     uint32_t spacing = 3 * scale;
 
@@ -2361,9 +2422,9 @@ void kmain(BootInfo *boot)
         );
     }
 
-    
-
- 
+    /*
+     * Boutons du panneau.
+     */
     draw_rect(
         boot,
         20,
@@ -2391,9 +2452,9 @@ void kmain(BootInfo *boot)
         0x00202C38
     );
 
-    
-
- 
+    /*
+     * Zone principale.
+     */
     uint32_t content_x = 250;
     uint32_t content_y = 78;
 
@@ -2416,9 +2477,9 @@ void kmain(BootInfo *boot)
         0x0018202C
     );
 
-    
-
- 
+    /*
+     * Fenêtre.
+     */
     uint32_t win_x = 290;
     uint32_t win_y = 120;
 
@@ -2441,9 +2502,9 @@ void kmain(BootInfo *boot)
         0x0028323E
     );
 
-    
-
- 
+    /*
+     * Barre de titre de la fenêtre.
+     */
     draw_rect(
         boot,
         win_x,
@@ -2453,9 +2514,9 @@ void kmain(BootInfo *boot)
         0x00334A5C
     );
 
-    
-
- 
+    /*
+     * Boutons de fenêtre.
+     */
     if (win_width >= 90) {
         draw_rect(
             boot,
@@ -2485,9 +2546,9 @@ void kmain(BootInfo *boot)
         );
     }
 
-    
-
- 
+    /*
+     * Quelques éléments dans la fenêtre.
+     */
     if (win_width > 100 && win_height > 100) {
         draw_rect(
             boot,
@@ -2519,42 +2580,37 @@ void kmain(BootInfo *boot)
 
     kernel_debug("[KERNEL] LOGO DONE\r\n");
 
-    kernel_debug("[KERNEL] LOGO DONE\r\n");
-
-    kernel_debug("[KERNEL] LOGO DONE\r\n");
-
-
-    
-
- 
+    /*
+     * Terminal.
+     */
 
     PCI_Device xhci;
 
-    kernel_debug("[PCI] FULL SCAN\\r\\n");
+    kernel_debug("[PCI] FULL SCAN\r\n");
     pci_debug_scan();
-    kernel_debug("[PCI] FULL SCAN DONE\\r\\n");
+    kernel_debug("[PCI] FULL SCAN DONE\r\n");
 
-    kernel_debug("[PCI] BEFORE scan\\r\\n");
+    kernel_debug("[PCI] BEFORE scan\r\n");
 
     int pci_ok = pci_find_xhci(&xhci);
 
-    kernel_debug("[PCI] AFTER scan\\r\\n");
+    kernel_debug("[PCI] AFTER scan\r\n");
 
     if (pci_ok)
-        kernel_debug("[PCI] xHCI FOUND\\r\\n");
+        kernel_debug("[PCI] xHCI FOUND\r\n");
     else
-        kernel_debug("[PCI] xHCI NOT FOUND\\r\\n");
+        kernel_debug("[PCI] xHCI NOT FOUND\r\n");
 
-    kernel_debug("[USB] BEFORE xhci_keyboard_init\\r\\n");
+    kernel_debug("[USB] BEFORE xhci_keyboard_init\r\n");
 
     int usb_ok = xhci_keyboard_init();
 
-    kernel_debug("[USB] AFTER xhci_keyboard_init\\r\\n");
+    kernel_debug("[USB] AFTER xhci_keyboard_init\r\n");
 
     if (usb_ok)
-        kernel_debug("[USB] HID KEYBOARD OK\\r\\n");
+        kernel_debug("[USB] HID KEYBOARD OK\r\n");
     else
-        kernel_debug("[USB] HID KEYBOARD FAIL\\r\\n");
+        kernel_debug("[USB] HID KEYBOARD FAIL\r\n");
 
     terminal_run(boot);
 }
