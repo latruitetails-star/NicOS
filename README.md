@@ -95,3 +95,6 @@ L'abstraction de stockage est : Filesystem → Block layer → AHCI / ATA PIO �
  * Ségrégation mémoire : Espace d'adressage unique partagé pour tous les processus utilisateurs.
  * Logs : Les logs XHCI polluent l'affichage standard à l'écran.
  * FS : Racine limitée à 8 entrées sur un seul secteur, pas de sous-répertoires gérés dynamiquement.
+
+signal group:
+https://signal.group/#CjQKIKGjfN-TuyOV8DlKYTErGCwZeLi_u0Oe0fz3nQR1Qz4bEhCO3Uybevbw2xwkpPmKrD_h
