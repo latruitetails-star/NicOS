@@ -45,4 +45,14 @@ void gfx_rect(
 
 void gfx_present(BootInfo *boot);
 
+void draw_glyph(
+    BootInfo *boot,
+    uint32_t x,
+    uint32_t y,
+    char c,
+    uint32_t scale,
+    uint32_t color
+);
+
+
 #endif
