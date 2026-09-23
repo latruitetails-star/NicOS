@@ -61,8 +61,7 @@ int window_create(
         
 
  
-        draw_rect(
-            window_boot,
+        gfx_rect(
             x,
             y,
             width,
@@ -73,8 +72,7 @@ int window_create(
         
 
  
-        draw_rect(
-            window_boot,
+        gfx_rect(
             x,
             y,
             width,
@@ -86,8 +84,7 @@ int window_create(
 
  
         if (width >= 90) {
-            draw_rect(
-                window_boot,
+            gfx_rect(
                 x + width - 78,
                 y + 10,
                 12,
@@ -95,8 +92,7 @@ int window_create(
                 0x00607080
             );
 
-            draw_rect(
-                window_boot,
+            gfx_rect(
                 x + width - 56,
                 y + 10,
                 12,
@@ -104,8 +100,7 @@ int window_create(
                 0x00607080
             );
 
-            draw_rect(
-                window_boot,
+            gfx_rect(
                 x + width - 34,
                 y + 10,
                 12,
